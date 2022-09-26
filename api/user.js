@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const mongoose = require("mongoose");
+const { genPassword } = require("../utils/password");
 const User = require("../models/User.model");
 
 //  @       /api/user/:id
@@ -10,12 +11,16 @@ router.get("/:id", (req, res, next) => {
     // Check if userId is rightly formatted
     if (mongoose.isValidObjectId(userId)) {
         User.findById(userId)
-            .then((user) => res.send(user))
+            .then((user) => {
+                if (!user) {
+                    res.status(404).send("User not found.");
+                } else {
+                    res.send(user);
+                }
+            })
             .catch((err) => console.error(err));
     } else {
-        res.status(404).send(
-            "User not found. Please try with a different user id."
-        );
+        res.status(404).send("Please enter a valid ID.");
     }
 });
 
@@ -23,14 +28,18 @@ router.get("/:id", (req, res, next) => {
 //  desc    Create user in database
 router.post("/new", (req, res, next) => {
     const { username, password } = req.body;
+
+    const { hash, salt } = genPassword(password);
+
     const newUser = new User({
         username: username,
-        password: password,
+        hash: hash,
+        salt: salt,
     });
 
     newUser
         .save()
-        .then((user) => res.send("User saved!"))
+        .then((user) => res.redirect("/login"))
         .catch((err) => console.error(err));
 });
 
