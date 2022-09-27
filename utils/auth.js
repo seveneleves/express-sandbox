@@ -1,3 +1,5 @@
+const User = require("../models/User.model");
+
 const isAuth = (req, res, next) => {
     const session = req.session;
     if (session.userId) {
@@ -7,4 +9,21 @@ const isAuth = (req, res, next) => {
     }
 };
 
-module.exports = isAuth;
+const isAdmin = (req, res, next) => {
+    User.findById(req.session.userId)
+        .then((user) => {
+            if (user.admin) {
+                next();
+            } else {
+                res.status(401).send(
+                    "You are not authorized to view this page."
+                );
+            }
+        })
+        .catch((err) => console.error(err));
+};
+
+module.exports = {
+    isAuth,
+    isAdmin,
+};

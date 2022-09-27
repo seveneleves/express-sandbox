@@ -36,7 +36,7 @@ app.engine(
         partialsDir: __dirname + "/views/partials",
         layoutsDir: __dirname + "/views/layouts",
         extname: "hbs",
-        defaultLayout: "main",
+        defaultLayout: "default",
     })
 );
 app.use(express.static("public"));
@@ -44,12 +44,11 @@ app.use(express.static("public"));
 // Routes
 
 // @        /
-// desc     Views
+// desc     GET - Login, Register, Home & Dashboard views
 app.use("/", index);
 
 // @        /login
 // desc     POST - Check user credentials
-// TODO     Implement logic
 app.post("/login", (req, res, next) => {
     const { username, password } = req.body;
 
@@ -65,6 +64,7 @@ app.post("/login", (req, res, next) => {
                 );
                 if (isValid) {
                     req.session.userId = user._id.valueOf();
+                    req.session.name = user.firstName;
                     res.redirect("/");
                 } else {
                     res.status(404).send("Wrong password. Please try again.");
@@ -84,6 +84,10 @@ app.get("/logout", (req, res, next) => {
 // @        /api/user
 // desc     User CRUD endpoints
 app.use("/api/user", userRoutes);
+
+app.get("*", (req, res, next) => {
+    res.render("404", { layout: "special" });
+});
 
 // Listener function
 app.listen(process.env.PORT, () =>

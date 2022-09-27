@@ -4,7 +4,7 @@ const { genPassword } = require("../utils/password");
 const User = require("../models/User.model");
 
 //  @       /api/user/:id
-//  desc    Get user information provided id
+//  desc    GET - Get user information provided id
 router.get("/:id", (req, res, next) => {
     const userId = req.params.id;
 
@@ -25,14 +25,16 @@ router.get("/:id", (req, res, next) => {
 });
 
 //  @       /api/user/new
-//  desc    Create user in database
+//  desc    POST - Adds new user in database
 router.post("/new", (req, res, next) => {
-    const { username, password } = req.body;
+    const { username, firstName, lastName, password } = req.body;
 
     const { hash, salt } = genPassword(password);
 
     const newUser = new User({
         username: username,
+        firstName: firstName,
+        lastName: lastName,
         hash: hash,
         salt: salt,
     });
